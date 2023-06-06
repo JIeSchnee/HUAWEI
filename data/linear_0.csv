@@ -1,0 +1,44 @@
+# started on Mon Jun  5 16:24:11 2023
+
+
+ Performance counter stats for process id '1823026':
+
+     1,077,382,103      branches                  #   78.281 M/sec                    (99.55%)
+       149,616,216      branch-misses             #   13.89% of all branches        
+       522,075,027      bus-cycles                #   37.933 M/sec                  
+        39,195,607      cache-misses              #   54.502 % of all cache refs    
+        71,915,594      cache-references          #    5.225 M/sec                  
+    56,212,293,251      cpu-cycles                #    4.084 GHz                    
+   183,592,889,726      instructions              #    3.27  insn per cycle         
+    33,165,864,333      ref-cycles                #    2.410 G/sec                  
+               314      cgroup-switches           #   22.815 /sec                   
+             9,316      context-switches          #  676.885 /sec                   
+         13,761.59 msec cpu-clock                 #    0.459 CPUs utilized          
+                16      cpu-migrations            #    1.163 /sec                   
+         13,764.50 msec task-clock                #    0.459 CPUs utilized          
+   330,017,055,104 ns   duration_time             #   23.978 G/sec                  
+        94,984,880      L1-dcache-load-misses     #    0.19% of all L1-dcache accesses
+    49,786,790,638      L1-dcache-loads           #    3.617 G/sec                  
+    26,190,952,916      L1-dcache-stores          #    1.903 G/sec                    (95.77%)
+        48,023,962      L1-icache-load-misses                                         (60.45%)
+     <not counted>      LLC-load-misses                                               (0.00%)
+     <not counted>      LLC-loads                                                     (0.00%)
+     <not counted>      LLC-store-misses                                              (0.00%)
+     <not counted>      LLC-stores                                                    (0.00%)
+     <not counted>      branch-load-misses                                            (0.00%)
+     <not counted>      branch-loads                                                  (0.00%)
+     <not counted>      dTLB-load-misses                                              (0.00%)
+     <not counted>      dTLB-loads                                                    (0.00%)
+     <not counted>      dTLB-store-misses                                             (0.00%)
+     <not counted>      dTLB-stores                                                   (0.00%)
+     <not counted>      iTLB-load-misses                                              (0.00%)
+     <not counted>      mem-stores                                                    (0.00%)
+     <not counted>      ref-cycles                                                    (0.00%)
+     <not counted>      slots                                                         (0.00%)
+
+      30.001550464 seconds time elapsed
+
+Some events weren't counted. Try disabling the NMI watchdog:
+	echo 0 > /proc/sys/kernel/nmi_watchdog
+	perf stat ...
+	echo 1 > /proc/sys/kernel/nmi_watchdog
