@@ -1,0 +1,40 @@
+# started on Mon Jun  5 15:48:49 2023
+
+
+ Performance counter stats for process id '1755656' (5 runs):
+
+    25,320,237,562      branches                  #    1.178 G/sec                    ( +- 16.00% )  (15.66%)
+       137,123,390      branch-misses             #    0.90% of all branches          ( +- 15.02% )  (15.96%)
+       748,996,248      bus-cycles                #   34.852 M/sec                    ( +- 14.24% )  (16.50%)
+        12,291,724      cache-misses              #   65.160 % of all cache refs      ( +- 13.42% )  (17.08%)
+        56,166,167      cache-references          #    2.614 M/sec                    ( +- 16.80% )  (12.75%)
+    81,249,220,749      cpu-cycles                #    3.781 GHz                      ( +- 11.51% )  (13.54%)
+   232,189,984,990      instructions              #    4.01  insn per cycle           ( +- 10.80% )  (20.31%)
+    44,351,001,422      ref-cycles                #    2.064 G/sec                    ( +-  9.68% )  (22.74%)
+               381      cgroup-switches           #   17.729 /sec                     ( +-  0.69% )
+             1,280      context-switches          #   59.561 /sec                     ( +-  0.23% )
+         21,439.20 msec cpu-clock                 #    0.715 CPUs utilized            ( +-  0.11% )
+                 9      cpu-migrations            #    0.419 /sec                     ( +- 11.33% )
+         21,439.68 msec task-clock                #    0.715 CPUs utilized            ( +-  0.11% )
+   330,019,618,544 ns   duration_time             #   15.357 G/sec                    ( +-  0.00% )
+         3,581,271      L1-dcache-load-misses     #    0.01% of all L1-dcache accesses  ( +- 19.40% )  (99.34%)
+    24,205,300,180      L1-dcache-loads           #    1.126 G/sec                    ( +- 25.58% )  (99.52%)
+     9,125,117,555      L1-dcache-stores          #  424.611 M/sec                    ( +- 20.03% )  (99.31%)
+         4,907,875      L1-icache-load-misses                                         ( +- 21.83% )  (98.68%)
+            32,418      LLC-load-misses           #   13.01% of all LL-cache accesses  ( +-235.69% )  (46.99%)
+           130,376      LLC-loads                 #    6.067 K/sec                    ( +- 54.79% )  (42.06%)
+             1,554      LLC-store-misses          #   72.311 /sec                     ( +-3385.10% )  (19.04%)
+            65,330      LLC-stores                #    3.040 K/sec                    ( +- 54.67% )  (17.39%)
+       104,248,849      branch-load-misses        #    4.851 M/sec                    ( +- 13.36% )  (24.00%)
+    21,172,216,067      branch-loads              #  985.189 M/sec                    ( +- 13.07% )  (29.63%)
+             7,371      dTLB-load-misses          #    0.00% of all dTLB cache accesses  ( +-371.40% )  (34.39%)
+    68,304,713,772      dTLB-loads                #    3.178 G/sec                    ( +- 10.02% )  (38.39%)
+            39,789      dTLB-store-misses         #    1.851 K/sec                    ( +- 10.14% )  (35.64%)
+    24,323,579,423      dTLB-stores               #    1.132 G/sec                    ( +-  8.61% )  (33.14%)
+           219,737      iTLB-load-misses                                              ( +-650.02% )  (19.32%)
+    23,902,346,815      mem-stores                #    1.112 G/sec                    ( +- 16.19% )  (14.81%)
+    46,777,829,690      ref-cycles                #    2.177 G/sec                    ( +- 16.55% )  (15.54%)
+   401,618,705,254      slots                     #   18.688 G/sec                    ( +- 16.80% )  (15.54%)
+
+         30.002136 +- 0.000123 seconds time elapsed  ( +-  0.00% )
+
