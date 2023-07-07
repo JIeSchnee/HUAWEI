@@ -9,24 +9,23 @@
 #include <asm/unistd.h>
 #include <sys/wait.h>
 
-extern "C" int zip_main(int argc, char *argv[]);
+extern "C" int linear_main(int argc, char *argv[]);
 
-class Load5: public rclcpp::Node
+class Load2: public rclcpp::Node
 {
 public:
-    Load5(): Node("zip_test")
+    Load2(): Node("linear_test")
     {
          RCLCPP_INFO(this->get_logger(), "START ** ");
 
-         timer_ = this->create_wall_timer(std::chrono::microseconds(150000), std::bind(&Load5::timerCallback, this));
-         outputFile_.open("zip_PMC.csv");
+         timer_ = this->create_wall_timer(std::chrono::microseconds(80000), std::bind(&Load2::timerCallback, this));
+         outputFile_.open("linear_E.csv");
 
          if (!outputFile_.is_open()) {
              RCLCPP_ERROR(this->get_logger(), "Failed to open output file");
-         }   
-    
+         }
     }
-    ~Load5() {
+    ~Load2() {
     // Close the output file
     if (outputFile_.is_open()) {
       outputFile_.close();
@@ -38,7 +37,8 @@ private:
     void timerCallback()
     {
         counter_++;
-        float period = 150000.;
+        float period = 80000.;
+
         RCLCPP_INFO(this->get_logger(), "Hello, round: %d", counter_);
 
         int argc=4;
@@ -448,18 +448,18 @@ private:
 
         auto start = std::chrono::high_resolution_clock::now();
         auto start_timestamp = std::chrono::time_point_cast<std::chrono::microseconds>(start).time_since_epoch().count();
-
-
+     
         /* first do abstraction layer specific initalizations */
-        zip_main(argc, argv);
 
-
-
+        for (int i = 0; i < 10; ++i) {
+        linear_main(argc, argv);
+        }
+  
         auto end = std::chrono::high_resolution_clock::now();
-
+        std::chrono::duration<double> duration = end - start;
         auto end_timestamp = std::chrono::time_point_cast<std::chrono::microseconds>(end).time_since_epoch().count();
 
-        std::chrono::duration<double> duration = end - start;
+        
         double executionTime = duration.count();
 
         // Disable the perf events and read the values
@@ -687,7 +687,7 @@ private:
             outputFile_ << "CPU clock: " << cpu_clock << std::endl;
             outputFile_ << "Task clock: " << task_clock << std::endl;
             outputFile_ << "Slots: " << slots << std::endl;
-            std::cout << "Metrics saved in " << "zip_PMC.csv" << std::endl;
+            std::cout << "Metrics saved in " << "linear_E.csv" << std::endl;
         } else {
             std::cerr << "Failed to open output file" << std::endl;
         }
@@ -696,13 +696,60 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
     int counter_;
     std::ofstream outputFile_;
+
+
 };
+
+
+// Function to set CPU core affinity for a thread
+void setThreadAffinity(pthread_t thread, int cpuCore)
+{
+
+  std::cout << "cpuCore: " << cpuCore << std::endl;
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  CPU_SET(cpuCore, &cpuset);
+  int result = pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset);
+  if (result != 0) {
+    // Handle error
+  }
+}
+
+int getLowestCpuUsageCore()
+{
+  double loadavg[3];
+  if (getloadavg(loadavg, 3) == -1) {
+    // Handle error
+  }
+
+  int numCores = sysconf(_SC_NPROCESSORS_ONLN);
+  double lowestUsage = loadavg[0];
+  int lowestCore = 0;
+
+  for (int core = 1; core < numCores; ++core) {
+    if (loadavg[core] < lowestUsage) {
+      lowestUsage = loadavg[core];
+      lowestCore = core;
+    }
+  }
+  std::cout << "lowestCore: " << lowestCore << std::endl;
+
+  return lowestCore;
+}
+
+// In your ROS 2 node class
+void allocateNodeToLowestCpuUsageCore()
+{
+  int lowestCore = getLowestCpuUsageCore();
+  setThreadAffinity(pthread_self(), lowestCore);
+}
 
 
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<Load5>();
+  auto node = std::make_shared<Load2>();
+
 
   rclcpp::executors::SingleThreadedExecutor executor;
   
@@ -716,10 +763,13 @@ int main(int argc, char ** argv)
     RCLCPP_ERROR(node->get_logger(), "Failed to set CPU affinity");
     return 1;
   }
+  // allocateNodeToLowestCpuUsageCore();
 
   executor.add_node(node);
 
   executor.spin();
+
+
 //   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;

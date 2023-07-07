@@ -9,24 +9,23 @@
 #include <asm/unistd.h>
 #include <sys/wait.h>
 
-extern "C" int zip_main(int argc, char *argv[]);
+extern "C" int parser_125_main(int argc, char *argv[]);
 
-class Load5: public rclcpp::Node
+class Load8: public rclcpp::Node
 {
 public:
-    Load5(): Node("zip_test")
+    Load8(): Node("parser_test")
     {
          RCLCPP_INFO(this->get_logger(), "START ** ");
 
-         timer_ = this->create_wall_timer(std::chrono::microseconds(150000), std::bind(&Load5::timerCallback, this));
-         outputFile_.open("zip_PMC.csv");
+         timer_ = this->create_wall_timer(std::chrono::microseconds(500000), std::bind(&Load8::timerCallback, this));
+         outputFile_.open("parser_E.csv");
 
          if (!outputFile_.is_open()) {
              RCLCPP_ERROR(this->get_logger(), "Failed to open output file");
-         }   
-    
+         }  
     }
-    ~Load5() {
+    ~Load8() {
     // Close the output file
     if (outputFile_.is_open()) {
       outputFile_.close();
@@ -38,7 +37,8 @@ private:
     void timerCallback()
     {
         counter_++;
-        float period = 150000.;
+        float period = 500000.;
+
         RCLCPP_INFO(this->get_logger(), "Hello, round: %d", counter_);
 
         int argc=4;
@@ -448,15 +448,13 @@ private:
 
         auto start = std::chrono::high_resolution_clock::now();
         auto start_timestamp = std::chrono::time_point_cast<std::chrono::microseconds>(start).time_since_epoch().count();
-
-
+     
         /* first do abstraction layer specific initalizations */
-        zip_main(argc, argv);
-
+        for (int i = 0; i < 15; ++i) {
+        parser_125_main(argc, argv);}
 
 
         auto end = std::chrono::high_resolution_clock::now();
-
         auto end_timestamp = std::chrono::time_point_cast<std::chrono::microseconds>(end).time_since_epoch().count();
 
         std::chrono::duration<double> duration = end - start;
@@ -638,7 +636,6 @@ private:
         // auto clockFrequency = std::chrono::steady_clock::period::den /
         //                   std::chrono::steady_clock::period::num;
 
-
         std::cout << "Round: " << counter_ << std::endl;
         std::cout << "Task Period: " << period / 1000000. << std::endl;
         std::cout << "ExecutionTime: " << executionTime << std::endl;
@@ -687,7 +684,7 @@ private:
             outputFile_ << "CPU clock: " << cpu_clock << std::endl;
             outputFile_ << "Task clock: " << task_clock << std::endl;
             outputFile_ << "Slots: " << slots << std::endl;
-            std::cout << "Metrics saved in " << "zip_PMC.csv" << std::endl;
+            std::cout << "Metrics saved in " << "parser_E.csv" << std::endl;
         } else {
             std::cerr << "Failed to open output file" << std::endl;
         }
@@ -702,9 +699,9 @@ private:
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<Load5>();
+  auto node = std::make_shared<Load8>();
 
-  rclcpp::executors::SingleThreadedExecutor executor;
+    rclcpp::executors::SingleThreadedExecutor executor;
   
   // Set CPU affinity to core 0
   cpu_set_t cpuset;
@@ -716,6 +713,7 @@ int main(int argc, char ** argv)
     RCLCPP_ERROR(node->get_logger(), "Failed to set CPU affinity");
     return 1;
   }
+
 
   executor.add_node(node);
 

@@ -18,8 +18,8 @@ public:
     {
          RCLCPP_INFO(this->get_logger(), "START ** ");
 
-         timer_ = this->create_wall_timer(std::chrono::microseconds(150000), std::bind(&Load5::timerCallback, this));
-         outputFile_.open("zip_PMC.csv");
+         timer_ = this->create_wall_timer(std::chrono::microseconds(250000), std::bind(&Load5::timerCallback, this));
+         outputFile_.open("zip_E.csv");
 
          if (!outputFile_.is_open()) {
              RCLCPP_ERROR(this->get_logger(), "Failed to open output file");
@@ -38,7 +38,7 @@ private:
     void timerCallback()
     {
         counter_++;
-        float period = 150000.;
+        float period = 250000.;
         RCLCPP_INFO(this->get_logger(), "Hello, round: %d", counter_);
 
         int argc=4;
@@ -451,10 +451,10 @@ private:
 
 
         /* first do abstraction layer specific initalizations */
+        for (int i = 0; i < 2; ++i) {
         zip_main(argc, argv);
-
-
-
+        }
+    
         auto end = std::chrono::high_resolution_clock::now();
 
         auto end_timestamp = std::chrono::time_point_cast<std::chrono::microseconds>(end).time_since_epoch().count();
@@ -687,7 +687,7 @@ private:
             outputFile_ << "CPU clock: " << cpu_clock << std::endl;
             outputFile_ << "Task clock: " << task_clock << std::endl;
             outputFile_ << "Slots: " << slots << std::endl;
-            std::cout << "Metrics saved in " << "zip_PMC.csv" << std::endl;
+            std::cout << "Metrics saved in " << "zip_E.csv" << std::endl;
         } else {
             std::cerr << "Failed to open output file" << std::endl;
         }

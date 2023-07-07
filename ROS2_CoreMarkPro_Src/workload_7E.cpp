@@ -9,38 +9,35 @@
 #include <asm/unistd.h>
 #include <sys/wait.h>
 
-extern "C" int zip_main(int argc, char *argv[]);
+extern "C" int sha_main(int argc, char *argv[]);
 
-class Load5: public rclcpp::Node
+class Load7: public rclcpp::Node
 {
 public:
-    Load5(): Node("zip_test")
+    Load7(): Node("sha_test")
     {
          RCLCPP_INFO(this->get_logger(), "START ** ");
 
-         timer_ = this->create_wall_timer(std::chrono::microseconds(150000), std::bind(&Load5::timerCallback, this));
-         outputFile_.open("zip_PMC.csv");
+         timer_ = this->create_wall_timer(std::chrono::microseconds(500000), std::bind(&Load7::timerCallback, this));
+         outputFile_.open("sha_E.csv");
 
          if (!outputFile_.is_open()) {
              RCLCPP_ERROR(this->get_logger(), "Failed to open output file");
-         }   
-    
+         } 
     }
-    ~Load5() {
+    ~Load7() {
     // Close the output file
     if (outputFile_.is_open()) {
       outputFile_.close();
     }
     }
+
 private:
-
-
     void timerCallback()
     {
         counter_++;
-        float period = 150000.;
         RCLCPP_INFO(this->get_logger(), "Hello, round: %d", counter_);
-
+        float period = 500000.;
         int argc=4;
         char *argv[] = { "-v0", "-i1", "-c1", "-w1" };
 
@@ -448,17 +445,16 @@ private:
 
         auto start = std::chrono::high_resolution_clock::now();
         auto start_timestamp = std::chrono::time_point_cast<std::chrono::microseconds>(start).time_since_epoch().count();
-
-
         /* first do abstraction layer specific initalizations */
-        zip_main(argc, argv);
+        for (int i = 0; i < 50; ++i) {
+        sha_main(argc, argv);
+        }
+    
 
 
 
         auto end = std::chrono::high_resolution_clock::now();
-
         auto end_timestamp = std::chrono::time_point_cast<std::chrono::microseconds>(end).time_since_epoch().count();
-
         std::chrono::duration<double> duration = end - start;
         double executionTime = duration.count();
 
@@ -687,7 +683,7 @@ private:
             outputFile_ << "CPU clock: " << cpu_clock << std::endl;
             outputFile_ << "Task clock: " << task_clock << std::endl;
             outputFile_ << "Slots: " << slots << std::endl;
-            std::cout << "Metrics saved in " << "zip_PMC.csv" << std::endl;
+            std::cout << "Metrics saved in " << "sha_E.csv" << std::endl;
         } else {
             std::cerr << "Failed to open output file" << std::endl;
         }
@@ -696,15 +692,15 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
     int counter_;
     std::ofstream outputFile_;
+
 };
 
 
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<Load5>();
-
-  rclcpp::executors::SingleThreadedExecutor executor;
+  auto node = std::make_shared<Load7>();
+    rclcpp::executors::SingleThreadedExecutor executor;
   
   // Set CPU affinity to core 0
   cpu_set_t cpuset;
@@ -716,6 +712,7 @@ int main(int argc, char ** argv)
     RCLCPP_ERROR(node->get_logger(), "Failed to set CPU affinity");
     return 1;
   }
+
 
   executor.add_node(node);
 

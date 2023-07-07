@@ -1,32 +1,33 @@
 #include "rclcpp/rclcpp.hpp"
 #include <sched.h>
-#include <unistd.h>
-
 #include <fstream> // Include the <fstream> header
 #include <iostream>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/perf_event.h>
 #include <asm/unistd.h>
 #include <sys/wait.h>
 
-extern "C" int zip_main(int argc, char *argv[]);
 
-class Load5: public rclcpp::Node
+extern "C" int nnet_test_main(int argc, char *argv[]);
+
+
+class Load1: public rclcpp::Node
 {
 public:
-    Load5(): Node("zip_test")
+    Load1(): Node("nnet_test")
     {
          RCLCPP_INFO(this->get_logger(), "START ** ");
 
-         timer_ = this->create_wall_timer(std::chrono::microseconds(150000), std::bind(&Load5::timerCallback, this));
-         outputFile_.open("zip_PMC.csv");
-
-         if (!outputFile_.is_open()) {
-             RCLCPP_ERROR(this->get_logger(), "Failed to open output file");
-         }   
-    
+         timer_ = this->create_wall_timer(std::chrono::microseconds(200000), std::bind(&Load1::timerCallback, this));
+        //  timer_ = this->create_wall_timer(std::chrono::seconds(1), std::bind(&Load1::timerCallback, this));
+        outputFile_.open("nnet_E.csv");
+        if (!outputFile_.is_open()) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to open output file");
+        }
     }
-    ~Load5() {
+
+    ~Load1() {
     // Close the output file
     if (outputFile_.is_open()) {
       outputFile_.close();
@@ -34,21 +35,20 @@ public:
     }
 private:
 
-
     void timerCallback()
     {
         counter_++;
-        float period = 150000.;
-        RCLCPP_INFO(this->get_logger(), "Hello, round: %d", counter_);
+        float period = 200000.;
 
         int argc=4;
         char *argv[] = { "-v0", "-i1", "-c1", "-w1" };
+        RCLCPP_INFO(this->get_logger(), "Hello, round: %d", counter_);
 
-        ////////////////////////////////////////////////////////////////////////////////
-        //                              MEASURE L1 CACHE                             ///
-        ////////////////////////////////////////////////////////////////////////////////
+        // ////////////////////////////////////////////////////////////////////////////////
+        // //                              MEASURE L1 CACHE                             ///
+        // ////////////////////////////////////////////////////////////////////////////////
 
-        // Create perf event attributes for L1 dcache load misses
+        // // Create perf event attributes for L1 dcache load misses
         struct perf_event_attr l1d_attr{};
         l1d_attr.type = PERF_TYPE_HW_CACHE;
         l1d_attr.size = sizeof(l1d_attr);
@@ -59,7 +59,7 @@ private:
         l1d_attr.exclude_kernel = 1;
         l1d_attr.exclude_hv = 1;
 
-        // Create perf event attributes for L1 dcache load
+        // // Create perf event attributes for L1 dcache load
         struct perf_event_attr l1d_load_attr{};
         l1d_load_attr.type = PERF_TYPE_HW_CACHE;
         l1d_load_attr.size = sizeof(l1d_load_attr);
@@ -70,7 +70,7 @@ private:
         l1d_load_attr.exclude_kernel = 1;
         l1d_load_attr.exclude_hv = 1;
 
-        //  TODO: DEBUG
+        // // //  TODO: DEBUG
         // // Create perf event attributes for L1 dcache stores
         // struct perf_event_attr l1_dcache_stores_attr{};
         // l1_dcache_stores_attr.type = PERF_TYPE_HW_CACHE;
@@ -83,7 +83,7 @@ private:
         // l1_dcache_stores_attr.exclude_hv = 1;
 
 
-        // Create perf event attributes for L1 icache load misses
+        // // Create perf event attributes for L1 icache load misses
         struct perf_event_attr l1_icache_attr{};
         l1_icache_attr.type = PERF_TYPE_HW_CACHE;
         l1_icache_attr.size = sizeof(l1_icache_attr);
@@ -95,24 +95,24 @@ private:
         l1_icache_attr.exclude_hv = 1;
 
 
-        // // Create perf event attributes for L1 icache load
-        // struct perf_event_attr l1_icache_load_attr{};
-        // l1_icache_load_attr.type = PERF_TYPE_HW_CACHE;
-        // l1_icache_load_attr.size = sizeof(l1_icache_load_attr);
-        // l1_icache_load_attr.config = PERF_COUNT_HW_CACHE_L1I |
-        //                         (PERF_COUNT_HW_CACHE_OP_READ << 8) |
-        //                         (PERF_COUNT_HW_CACHE_RESULT_ACCESS << 16);
-        // l1_icache_load_attr.disabled = 1;
-        // l1_icache_load_attr.exclude_kernel = 1;
-        // l1_icache_load_attr.exclude_hv = 1;
+        // // // Create perf event attributes for L1 icache load
+        // // struct perf_event_attr l1_icache_load_attr{};
+        // // l1_icache_load_attr.type = PERF_TYPE_HW_CACHE;
+        // // l1_icache_load_attr.size = sizeof(l1_icache_load_attr);
+        // // l1_icache_load_attr.config = PERF_COUNT_HW_CACHE_L1I |
+        // //                         (PERF_COUNT_HW_CACHE_OP_READ << 8) |
+        // //                         (PERF_COUNT_HW_CACHE_RESULT_ACCESS << 16);
+        // // l1_icache_load_attr.disabled = 1;
+        // // l1_icache_load_attr.exclude_kernel = 1;
+        // // l1_icache_load_attr.exclude_hv = 1;
 
 
 
-        ////////////////////////////////////////////////////////////////////////////////
-        //                              MEASURE LLC                                  ///
-        //  Attention: cannot directly measure LLC load and LLC load misses together ///
-        //  can not measure LLC-store-misses LLC-stores                              ///
-        ////////////////////////////////////////////////////////////////////////////////
+        // ////////////////////////////////////////////////////////////////////////////////
+        // //                              MEASURE LLC                                  ///
+        // //  Attention: cannot directly measure LLC load and LLC load misses together ///
+        // //  can not measure LLC-store-misses LLC-stores                              ///
+        // ////////////////////////////////////////////////////////////////////////////////
 
 
         // Create perf event attributes for LLC load misses
@@ -448,18 +448,18 @@ private:
 
         auto start = std::chrono::high_resolution_clock::now();
         auto start_timestamp = std::chrono::time_point_cast<std::chrono::microseconds>(start).time_since_epoch().count();
-
-
+     
         /* first do abstraction layer specific initalizations */
-        zip_main(argc, argv);
-
-
-
+        
+        for (int i = 0; i < 2; ++i) {
+        nnet_test_main(argc, argv);        
+        }
+    
         auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> duration = end - start;
 
         auto end_timestamp = std::chrono::time_point_cast<std::chrono::microseconds>(end).time_since_epoch().count();
 
-        std::chrono::duration<double> duration = end - start;
         double executionTime = duration.count();
 
         // Disable the perf events and read the values
@@ -687,25 +687,24 @@ private:
             outputFile_ << "CPU clock: " << cpu_clock << std::endl;
             outputFile_ << "Task clock: " << task_clock << std::endl;
             outputFile_ << "Slots: " << slots << std::endl;
-            std::cout << "Metrics saved in " << "zip_PMC.csv" << std::endl;
+            std::cout << "Metrics saved in " << "nnet_E.csv" << std::endl;
         } else {
             std::cerr << "Failed to open output file" << std::endl;
         }
     }
-
     rclcpp::TimerBase::SharedPtr timer_;
     int counter_;
     std::ofstream outputFile_;
+
+
 };
 
 
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<Load5>();
-
+  auto node = std::make_shared<Load1>();
   rclcpp::executors::SingleThreadedExecutor executor;
-  
   // Set CPU affinity to core 0
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
@@ -717,10 +716,13 @@ int main(int argc, char ** argv)
     return 1;
   }
 
+
   executor.add_node(node);
 
   executor.spin();
-//   rclcpp::spin(node);
+
+  // rclcpp::spin(node);
+
   rclcpp::shutdown();
   return 0;
 }

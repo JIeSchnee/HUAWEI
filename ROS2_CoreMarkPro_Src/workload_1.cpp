@@ -21,7 +21,7 @@ public:
 
          timer_ = this->create_wall_timer(std::chrono::microseconds(100000), std::bind(&Load1::timerCallback, this));
         //  timer_ = this->create_wall_timer(std::chrono::seconds(1), std::bind(&Load1::timerCallback, this));
-        outputFile_.open("nnest_PMC");
+        outputFile_.open("nnest_PMC.csv");
         if (!outputFile_.is_open()) {
             RCLCPP_ERROR(this->get_logger(), "Failed to open output file");
         }
@@ -38,13 +38,17 @@ private:
     void timerCallback()
     {
         counter_++;
+        float period = 100000.;
+
+        int argc=4;
+        char *argv[] = { "-v0", "-i1", "-c1", "-w1" };
         RCLCPP_INFO(this->get_logger(), "Hello, round: %d", counter_);
 
-        ////////////////////////////////////////////////////////////////////////////////
-        //                              MEASURE L1 CACHE                             ///
-        ////////////////////////////////////////////////////////////////////////////////
+        // ////////////////////////////////////////////////////////////////////////////////
+        // //                              MEASURE L1 CACHE                             ///
+        // ////////////////////////////////////////////////////////////////////////////////
 
-        // Create perf event attributes for L1 dcache load misses
+        // // Create perf event attributes for L1 dcache load misses
         struct perf_event_attr l1d_attr{};
         l1d_attr.type = PERF_TYPE_HW_CACHE;
         l1d_attr.size = sizeof(l1d_attr);
@@ -55,7 +59,7 @@ private:
         l1d_attr.exclude_kernel = 1;
         l1d_attr.exclude_hv = 1;
 
-        // Create perf event attributes for L1 dcache load
+        // // Create perf event attributes for L1 dcache load
         struct perf_event_attr l1d_load_attr{};
         l1d_load_attr.type = PERF_TYPE_HW_CACHE;
         l1d_load_attr.size = sizeof(l1d_load_attr);
@@ -66,7 +70,7 @@ private:
         l1d_load_attr.exclude_kernel = 1;
         l1d_load_attr.exclude_hv = 1;
 
-        //  TODO: DEBUG
+        // // //  TODO: DEBUG
         // // Create perf event attributes for L1 dcache stores
         // struct perf_event_attr l1_dcache_stores_attr{};
         // l1_dcache_stores_attr.type = PERF_TYPE_HW_CACHE;
@@ -79,7 +83,7 @@ private:
         // l1_dcache_stores_attr.exclude_hv = 1;
 
 
-        // Create perf event attributes for L1 icache load misses
+        // // Create perf event attributes for L1 icache load misses
         struct perf_event_attr l1_icache_attr{};
         l1_icache_attr.type = PERF_TYPE_HW_CACHE;
         l1_icache_attr.size = sizeof(l1_icache_attr);
@@ -91,24 +95,24 @@ private:
         l1_icache_attr.exclude_hv = 1;
 
 
-        // // Create perf event attributes for L1 icache load
-        // struct perf_event_attr l1_icache_load_attr{};
-        // l1_icache_load_attr.type = PERF_TYPE_HW_CACHE;
-        // l1_icache_load_attr.size = sizeof(l1_icache_load_attr);
-        // l1_icache_load_attr.config = PERF_COUNT_HW_CACHE_L1I |
-        //                         (PERF_COUNT_HW_CACHE_OP_READ << 8) |
-        //                         (PERF_COUNT_HW_CACHE_RESULT_ACCESS << 16);
-        // l1_icache_load_attr.disabled = 1;
-        // l1_icache_load_attr.exclude_kernel = 1;
-        // l1_icache_load_attr.exclude_hv = 1;
+        // // // Create perf event attributes for L1 icache load
+        // // struct perf_event_attr l1_icache_load_attr{};
+        // // l1_icache_load_attr.type = PERF_TYPE_HW_CACHE;
+        // // l1_icache_load_attr.size = sizeof(l1_icache_load_attr);
+        // // l1_icache_load_attr.config = PERF_COUNT_HW_CACHE_L1I |
+        // //                         (PERF_COUNT_HW_CACHE_OP_READ << 8) |
+        // //                         (PERF_COUNT_HW_CACHE_RESULT_ACCESS << 16);
+        // // l1_icache_load_attr.disabled = 1;
+        // // l1_icache_load_attr.exclude_kernel = 1;
+        // // l1_icache_load_attr.exclude_hv = 1;
 
 
 
-        ////////////////////////////////////////////////////////////////////////////////
-        //                              MEASURE LLC                                  ///
-        //  Attention: cannot directly measure LLC load and LLC load misses together ///
-        //  can not measure LLC-store-misses LLC-stores                              ///
-        ////////////////////////////////////////////////////////////////////////////////
+        // ////////////////////////////////////////////////////////////////////////////////
+        // //                              MEASURE LLC                                  ///
+        // //  Attention: cannot directly measure LLC load and LLC load misses together ///
+        // //  can not measure LLC-store-misses LLC-stores                              ///
+        // ////////////////////////////////////////////////////////////////////////////////
 
 
         // Create perf event attributes for LLC load misses
@@ -442,15 +446,18 @@ private:
         ioctl(slots_fd, PERF_EVENT_IOC_RESET, 0);
         ioctl(slots_fd, PERF_EVENT_IOC_ENABLE, 0);
 
-
-
-        int argc=4;
-        char *argv[] = { "-v0", "-i1", "-c1", "-w1" };
+        auto start = std::chrono::high_resolution_clock::now();
+        auto start_timestamp = std::chrono::time_point_cast<std::chrono::microseconds>(start).time_since_epoch().count();
      
         /* first do abstraction layer specific initalizations */
         nnet_test_main(argc, argv);
 
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> duration = end - start;
+        auto end_timestamp = std::chrono::time_point_cast<std::chrono::microseconds>(end).time_since_epoch().count();
 
+        
+        double executionTime = duration.count();
 
         // Disable the perf events and read the values
 
@@ -629,31 +636,41 @@ private:
         //                   std::chrono::steady_clock::period::num;
 
 
-        std::cout << "L1 dcache load misses: " << l1d_load_misses << std::endl;
-        std::cout << "L1 dcache load: " << l1d_load << std::endl;
-        // std::cout << "L1 dcache stores: " << l1_dcache_stores << std::endl;
-        std::cout << "L1 icache load misses: " << l1_icache_load_misses << std::endl;
-        // std::cout << "L1 icache load: " << l1_icache_load << std::endl;
-        std::cout << "LLC load misses: " << llc_load_misses << std::endl;
-        // std::cout << "LLC loads: " << llc_loads << std::endl;
-        // std::cout << "LLC store misses: " << llc_store_misses << std::endl;
-        std::cout << "Branch misses: " << branch_misses << std::endl;
-        std::cout << "Branch instructions: " << branch_instructions << std::endl;
-        // std::cout << "Cache misses: " << cache_misses << std::endl;
-        // std::cout << "Cache references: " << cache_references << std::endl;
-        std::cout << "CPU cycles: " << cpu_cycles << std::endl;
-        std::cout << "Instructions: " << instructions << std::endl;
-        std::cout << "Reference cycles: " << ref_cycles << std::endl;
-        std::cout << "Bus cycles: " << bus_cycles << std::endl;
-        std::cout << "CPU clock: " << cpu_clock << std::endl;
-        std::cout << "Task clock: " << task_clock << std::endl;
-        std::cout << "Slots: " << slots << std::endl;
+        // std::cout << "Round: " << counter_ << std::endl;
+        // std::cout << "Task Period: " << period / 1000000. << std::endl;
+        // std::cout << "ExecutionTime: " << executionTime << std::endl;
+        // std::cout << "Task Uti: " <<  executionTime / (period / 1000000.) << std::endl;
+        // std::cout << "ExecutionStart time point: " << start_timestamp << std::endl;
+        // std::cout << "ExecutionStart end point: " << end_timestamp << std::endl;
+        // std::cout << "L1 dcache load misses: " << l1d_load_misses << std::endl;
+        // std::cout << "L1 dcache load: " << l1d_load << std::endl;
+        // // std::cout << "L1 dcache stores: " << l1_dcache_stores << std::endl;
+        // std::cout << "L1 icache load misses: " << l1_icache_load_misses << std::endl;
+        // // std::cout << "L1 icache load: " << l1_icache_load << std::endl;
+        // std::cout << "LLC load misses: " << llc_load_misses << std::endl;
+        // // std::cout << "LLC loads: " << llc_loads << std::endl;
+        // // std::cout << "LLC store misses: " << llc_store_misses << std::endl;
+        // std::cout << "Branch misses: " << branch_misses << std::endl;
+        // std::cout << "Branch instructions: " << branch_instructions << std::endl;
+        // // std::cout << "Cache misses: " << cache_misses << std::endl;
+        // // std::cout << "Cache references: " << cache_references << std::endl;
+        // std::cout << "CPU cycles: " << cpu_cycles << std::endl;
+        // std::cout << "Instructions: " << instructions << std::endl;
+        // std::cout << "Reference cycles: " << ref_cycles << std::endl;
+        // std::cout << "Bus cycles: " << bus_cycles << std::endl;
+        // std::cout << "CPU clock: " << cpu_clock << std::endl;
+        // std::cout << "Task clock: " << task_clock << std::endl;
+        // std::cout << "ExecutionTime: " << executionTime << std::endl;
 
 
 
-        // std::ofstream outputFile("nnest_PMC");
         if (outputFile_.is_open()) {
             outputFile_ << "Round: " << counter_ << std::endl;
+            outputFile_ << "Task Period: " << period / 1000000. << std::endl;
+            outputFile_ << "ExecutionTime: " << executionTime << std::endl;
+            outputFile_ << "Task Uti: " << executionTime / (period / 1000000.) << std::endl;
+            outputFile_ << "ExecutionStart time point: " << start_timestamp << std::endl;
+            outputFile_ << "ExecutionStart end point: " << end_timestamp << std::endl;
             outputFile_ << "L1 dcache load misses: " << l1d_load_misses << std::endl;
             outputFile_ << "L1 dcache load: " << l1d_load << std::endl;
             outputFile_ << "L1 icache load misses: " << l1_icache_load_misses << std::endl;
@@ -667,7 +684,7 @@ private:
             outputFile_ << "CPU clock: " << cpu_clock << std::endl;
             outputFile_ << "Task clock: " << task_clock << std::endl;
             outputFile_ << "Slots: " << slots << std::endl;
-            std::cout << "Metrics saved in " << "nnest_PMC" << std::endl;
+            std::cout << "Metrics saved in " << "nnest_PMC.csv" << std::endl;
         } else {
             std::cerr << "Failed to open output file" << std::endl;
         }
@@ -688,7 +705,7 @@ int main(int argc, char ** argv)
   // Set CPU affinity to core 0
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
-  CPU_SET(0, &cpuset);  // Replace 0 with the desired core number
+  CPU_SET(1, &cpuset);  // Replace 0 with the desired core number
 
   pid_t pid = getpid();
   if (sched_setaffinity(pid, sizeof(cpuset), &cpuset) == -1) {
