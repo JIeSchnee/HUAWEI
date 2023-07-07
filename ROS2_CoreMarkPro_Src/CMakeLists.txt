@@ -44,6 +44,15 @@ add_executable(parser_125 src/workload_8.cpp)
 add_executable(monitor src/monitor.cpp)
 
 
+add_executable(nnet_E src/workload_1E.cpp)
+add_executable(linear_E src/workload_2E.cpp)
+add_executable(loops_E src/workload_3E.cpp)
+add_executable(radix_E src/workload_4E.cpp)
+add_executable(zip_E src/workload_5E.cpp)
+add_executable(core_E src/workload_6E.cpp)
+add_executable(sha_E src/workload_7E.cpp)
+add_executable(parser_E src/workload_8E.cpp)
+
 target_link_libraries(cjpeg 
 /home/jiezou/Documents/coremark-pro/cjpeg.a
 /home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
@@ -82,6 +91,40 @@ target_link_libraries(parser_125
 )
 
 
+target_link_libraries(nnet_E 
+/home/jiezou/Documents/coremark-pro/nnet_test.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(linear_E 
+/home/jiezou/Documents/coremark-pro/linear.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(loops_E 
+/home/jiezou/Documents/coremark-pro/loops.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(radix_E 
+/home/jiezou/Documents/coremark-pro/radix.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(zip_E 
+/home/jiezou/Documents/coremark-pro/zip.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(core_E 
+/home/jiezou/Documents/coremark-pro/core.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(sha_E 
+/home/jiezou/Documents/coremark-pro/sha.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(parser_E 
+/home/jiezou/Documents/coremark-pro/parser-125k.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+
+
 ament_target_dependencies(cjpeg rclcpp)
 ament_target_dependencies(nnet_test rclcpp)
 ament_target_dependencies(linear rclcpp)
@@ -92,6 +135,16 @@ ament_target_dependencies(core rclcpp)
 ament_target_dependencies(sha rclcpp)
 ament_target_dependencies(parser_125 rclcpp)
 ament_target_dependencies(monitor rclcpp)
+
+ament_target_dependencies(nnet_E rclcpp)
+ament_target_dependencies(linear_E rclcpp)
+ament_target_dependencies(loops_E rclcpp)
+ament_target_dependencies(radix_E rclcpp)
+ament_target_dependencies(zip_E rclcpp)
+ament_target_dependencies(core_E rclcpp)
+ament_target_dependencies(sha_E rclcpp)
+ament_target_dependencies(parser_E rclcpp)
+
 
 
 install(TARGETS
@@ -105,6 +158,14 @@ install(TARGETS
   sha
   parser_125
   monitor
+  nnet_E
+  linear_E
+  loops_E
+  radix_E
+  zip_E
+  core_E
+  sha_E
+  parser_E
   DESTINATION lib/${PROJECT_NAME}
 )
 
