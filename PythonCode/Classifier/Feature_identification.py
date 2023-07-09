@@ -45,19 +45,23 @@ def coefficients_visualization(data, features):
     # Show the plot
     plt.show()
 
-def preprocess(data, features):
+def preprocess(data, features, normaliser=None):
     # Normalise w.r.t. the CPU cycles.
     cpu_cycle_norm_features = ["L1 dcache load misses", "L1 icache load misses", "LLC load misses",
                                "Branch misses", "Branch instructions", "Bus cycles", "CPU cycles"]
-    data[cpu_cycle_norm_features] = data[cpu_cycle_norm_features].div(data["Task Period"], axis=0)
+    data[cpu_cycle_norm_features] = data[cpu_cycle_norm_features].div(data["Instructions"], axis=0)
 
     # Normalise all features to 0-1.
-    normaliser = MinMaxScaler()
+    if normaliser is None:
+        normaliser = MinMaxScaler()
+        data[features] = normaliser.fit_transform(data[features])
 
-    data[features] = normaliser.fit_transform(data[features])
+        return data, features, normaliser
+    else:
+        data[features] = normaliser.transform(data[features])
+
+        return data, features
     # coefficients_visualization(data, features)
-
-    return data, features
 
 #
 # def logistic_regression_classifier(selected_features_2, class_labels, method):
@@ -79,7 +83,7 @@ def classifiers(selected_features, class_labels):
 
     classifier_list = {
         "Logistic Regression": LogisticRegression(random_state=42),
-        "Support Vector Machine": SVC(kernel="linear", random_state=42),
+        "Support Vector Machine": SVC(kernel="rbf", random_state=42),
         "Random Forest": RandomForestClassifier(random_state=42)
     }
 
@@ -350,7 +354,7 @@ def add_spectral_enveloping_data_as_feature(data, fft_magnitudes, features):
     return data, features
 
 
-def key_features_identification(data, features, k, visualisation=False):
+def key_features_identification(data, features, k, visualisation=True):
     logging.info("=== Key Features Identification ===")
 
     methods_dict = {}
@@ -585,7 +589,7 @@ def main():
     workload_list = get_data()
     n_workloads = len(workload_list)
     data, features = construct_dataframe(workload_list)
-    data, features = preprocess(data, features)
+    data, features, _ = preprocess(data, features)
 
     logging.info("Features: {}".format(features))
     logging.info("Shape: {}".format(data[features].shape))
@@ -611,11 +615,12 @@ def main():
     # for i in range(int(np.ceil(len(features) / 2))):
     # for i in range(len(features)):
     for i in range(5):
-        k = i+1
+        k = i+5
         logging.info("Feature Number: {}".format(k))
         methods_dict, methods_acc_dict = key_features_identification(data, features, k)
         overall_result[k] = [methods_dict, methods_acc_dict]
 
+    print(overall_result[5])
     # Visualisation(overall_result, "Feature Selection")
 
     # with open("Data_keep_all.pkl", "wb") as f:
