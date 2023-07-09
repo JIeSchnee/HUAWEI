@@ -53,6 +53,16 @@ add_executable(core_E src/workload_6E.cpp)
 add_executable(sha_E src/workload_7E.cpp)
 add_executable(parser_E src/workload_8E.cpp)
 
+add_executable(nnet_Enemy src/workload_1Enemy.cpp)
+add_executable(linear_Enemy src/workload_2Enemy.cpp)
+add_executable(loops_Enemy src/workload_3Enemy.cpp)
+add_executable(radix_Enemy src/workload_4Enemy.cpp)
+add_executable(zip_Enemy src/workload_5Enemy.cpp)
+add_executable(core_Enemy src/workload_6Enemy.cpp)
+add_executable(sha_Enemy src/workload_7Enemy.cpp)
+add_executable(parser_Enemy src/workload_8Enemy.cpp)
+
+
 target_link_libraries(cjpeg 
 /home/jiezou/Documents/coremark-pro/cjpeg.a
 /home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
@@ -124,6 +134,38 @@ target_link_libraries(parser_E
 /home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
 )
 
+target_link_libraries(nnet_Enemy 
+/home/jiezou/Documents/coremark-pro/nnet_test.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(linear_Enemy 
+/home/jiezou/Documents/coremark-pro/linear.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(loops_Enemy 
+/home/jiezou/Documents/coremark-pro/loops.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(radix_Enemy 
+/home/jiezou/Documents/coremark-pro/radix.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(zip_Enemy
+/home/jiezou/Documents/coremark-pro/zip.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(core_Enemy 
+/home/jiezou/Documents/coremark-pro/core.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(sha_Enemy 
+/home/jiezou/Documents/coremark-pro/sha.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
+target_link_libraries(parser_Enemy 
+/home/jiezou/Documents/coremark-pro/parser-125k.a
+/home/jiezou/Documents/coremark-pro/builds/linux64/gcc64/obj/mith.a
+)
 
 ament_target_dependencies(cjpeg rclcpp)
 ament_target_dependencies(nnet_test rclcpp)
@@ -145,7 +187,14 @@ ament_target_dependencies(core_E rclcpp)
 ament_target_dependencies(sha_E rclcpp)
 ament_target_dependencies(parser_E rclcpp)
 
-
+ament_target_dependencies(nnet_Enemy rclcpp)
+ament_target_dependencies(linear_Enemy rclcpp)
+ament_target_dependencies(loops_Enemy rclcpp)
+ament_target_dependencies(radix_Enemy rclcpp)
+ament_target_dependencies(zip_Enemy rclcpp)
+ament_target_dependencies(core_Enemy rclcpp)
+ament_target_dependencies(sha_Enemy rclcpp)
+ament_target_dependencies(parser_Enemy rclcpp)
 
 install(TARGETS
   cjpeg
@@ -166,6 +215,14 @@ install(TARGETS
   core_E
   sha_E
   parser_E
+  nnet_Enemy
+  linear_Enemy
+  loops_Enemy
+  radix_Enemy
+  zip_Enemy
+  core_Enemy
+  sha_Enemy
+  parser_Enemy
   DESTINATION lib/${PROJECT_NAME}
 )
 
