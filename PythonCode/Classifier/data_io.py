@@ -40,11 +40,11 @@ def coefficients_visualization(data, features):
     # Show the plot
     plt.show()
 
-def get_data():
+def get_data(directory_path='/home/jiezou/ros2_ws/Data/ros2_2/*'):
     # Specify the path to your CSV files.
     # directory_path = '/home/jiezou/ros2_ws/Data/ros2/*.csv'
     # directory_path = '/home/jiezou/ros2_ws/Data/ros2/*'
-    directory_path = '/home/jiezou/ros2_ws/Data/ros2_2/*'
+
 
     # Find all CSV files in the directory using glob
     csv_files = glob.glob(directory_path)
