@@ -49,7 +49,7 @@ def preprocess(data, features, normaliser=None):
     # Normalise w.r.t. the CPU cycles.
     cpu_cycle_norm_features = ["L1 dcache load misses", "L1 icache load misses", "LLC load misses",
                                "Branch misses", "Branch instructions", "Bus cycles", "CPU cycles"]
-    data[cpu_cycle_norm_features] = data[cpu_cycle_norm_features].div(data["Instructions"], axis=0)
+    data[cpu_cycle_norm_features] = data[cpu_cycle_norm_features].div(data["Branch instructions"], axis=0)
 
     # Normalise all features to 0-1.
     if normaliser is None:
@@ -292,6 +292,7 @@ def features_analysis_based_selection(data, features, n_workloads):
     # data_standardized = scaler.fit_transform(data_reshaped)
 
     k = int(np.ceil(n_features/2))  # Number of features to keep
+    # k = n_features
 
     # Select features based on F-ratio scores and remove 10 features with the lowest scores.
     selector = SelectKBest(f_classif, k=k)
@@ -613,15 +614,15 @@ def main():
 
     overall_result = {}
     # for i in range(int(np.ceil(len(features) / 2))):
-    # for i in range(len(features)):
-    for i in range(5):
-        k = i+5
+    for i in range(len(features)):
+    # for i in range(5):
+        k = i+3
         logging.info("Feature Number: {}".format(k))
         methods_dict, methods_acc_dict = key_features_identification(data, features, k)
         overall_result[k] = [methods_dict, methods_acc_dict]
 
     print(overall_result[5])
-    # Visualisation(overall_result, "Feature Selection")
+    Visualisation(overall_result, "Feature Selection")
 
     # with open("Data_keep_all.pkl", "wb") as f:
     # pickle.dump(overall_result, f)
